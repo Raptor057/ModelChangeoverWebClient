@@ -1,11 +1,7 @@
-<script setup></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="min-h-screen flex items-center justify-center bg-slate-900">
+    <h1 class="text-3xl font-bold text-white">
+      Tailwind v4 + Vue funcionando 😎
+    </h1>
+  </div>
 </template>
-
-<style scoped></style>
