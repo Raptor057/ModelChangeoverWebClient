@@ -13,16 +13,40 @@ dist-ssr
 *.local
 
 # Editor directories and files
-node_modules/
-.vscode/
-dist/
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-respaldo/
-build/
+ModelChangeoverWebClient/node_modules/
+ModelChangeoverWebClient/.vscode/
+ModelChangeoverWebClient/dist/
+ModelChangeoverWebClient/!.vscode/extensions.json
+ModelChangeoverWebClient/.idea
+ModelChangeoverWebClient/.DS_Store
+ModelChangeoverWebClient/*.suo
+ModelChangeoverWebClient/*.ntvs*
+ModelChangeoverWebClient/*.njsproj
+ModelChangeoverWebClient/*.sln
+ModelChangeoverWebClient/*.sw?
+ModelChangeoverWebClient/respaldo/
+ModelChangeoverWebClient/build/
+
+node_modules
+
+# Output
+ModelChangeoverWebClient/.output
+ModelChangeoverWebClient/.vercel
+ModelChangeoverWebClient/.netlify
+ModelChangeoverWebClient/.wrangler
+ModelChangeoverWebClient/.svelte-kit
+/build
+
+# OS
+ModelChangeoverWebClient/.DS_Store
+ModelChangeoverWebClient/Thumbs.db
+
+# Env
+/.env
+/.env.*
+/!.env.example
+/!.env.test
+
+# Vite
+ModelChangeoverWebClient/vite.config.js.timestamp-*
+ModelChangeoverWebClient/vite.config.ts.timestamp-*
