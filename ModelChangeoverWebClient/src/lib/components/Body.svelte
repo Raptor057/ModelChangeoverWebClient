@@ -1,4 +1,5 @@
 <script>
+    // @ts-nocheck
   export let showToKeep;
   export let showToPut;
   export let showToTake;

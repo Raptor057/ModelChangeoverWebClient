@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	
@@ -9,4 +9,9 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{@render children()}
+{@render children()} -->
+<script>
+  import './layout.css';
+</script>
+
+<slot />

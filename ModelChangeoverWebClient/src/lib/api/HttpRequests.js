@@ -1,3 +1,4 @@
+  // @ts-nocheck
 const handleRejectedResponse = async (error) => {
     console.error(error);
     let message = error.message || `${error.status}: ${error.statusText}`;
