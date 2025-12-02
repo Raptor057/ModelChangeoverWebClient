@@ -1,5 +1,5 @@
 <script>
-    // @ts-nocheck
+  // @ts-nocheck
   import { ChangeoverApi, CommonApi } from '$lib/api/HttpRequests.js';
 
   export let line;
@@ -39,124 +39,73 @@
   };
 </script>
 
-<header>
-  {#if status === "Cambio de módelo requerido."}
-    <button
-      id="apply-changeover-button"
-      on:click={handleApplyChangeoverClick}
-      {disabled}
-    >
-      Aplicar
-    </button>
-  {/if}
+<header class="relative flex items-center gap-3 h-8 bg-[#061933] text-white text-xs px-3">
+  <img
+    src="/gt-logo.png"
+    alt="General Transmissions"
+    class="h-6 w-auto"
+  />
 
-  <img src="/gt-logo.png" alt="General Transmissions" />
-  <b>Cambio de Modelo</b>
+  <b class="font-semibold tracking-wide">
+    Cambio de Modelo
+  </b>
 
-  <strong>{line.code}</strong>
+  <!-- Línea -->
+  <strong class="rounded px-2 py-0.5 bg-white/20 text-[#ff9500] text-xs min-w-[3rem] text-center">
+    {line.code}
+  </strong>
 
-  <span>&Oacute;rden Cargada</span>
-  <strong>
+  <!-- Orden cargada -->
+  <span class="ml-2 text-[0.7rem] opacity-80">
+    &Oacute;rden Cargada
+  </span>
+  <strong class="rounded px-2 py-0.5 bg-white/10 text-[#ff9500] text-xs flex items-center gap-1">
     {line.workOrderCode}
-    &bull;
-    {line.partNo}
-    {line.revision}
+    <span>&bull;</span>
+    {line.partNo}{line.revision}
   </strong>
 
-  <span>&Oacute;rden Activa</span>
-  <strong>
+  <!-- Orden activa -->
+  <span class="ml-2 text-[0.7rem] opacity-80">
+    &Oacute;rden Activa
+  </span>
+  <strong class="rounded px-2 py-0.5 bg-white/10 text-[#ff9500] text-xs flex items-center gap-1">
     {workOrder.code}
-    &bull;
-    {workOrder.partNo}
-    {workOrder.revision}
+    <span>&bull;</span>
+    {workOrder.partNo}{workOrder.revision}
   </strong>
 
-  <button
-    id="gama-button"
-    on:click={handleUpdateGamaClick}
-    {disabled}
-  >
-    Actualizar Gammas
-  </button>
+  <div class="ml-auto flex items-center gap-2">
+    {#if status === "Cambio de módelo requerido."}
+      <button
+        id="apply-changeover-button"
+        on:click={handleApplyChangeoverClick}
+        disabled={disabled}
+        class="inline-flex items-center h-7 px-3 rounded border border-emerald-500 text-emerald-400 text-xs font-semibold
+               bg-transparent hover:bg-emerald-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Aplicar
+      </button>
+    {/if}
 
-  <button
-    id="gama-button"
-    on:click={handleDeletedGamaClick}
-    {disabled}
-  >
-    Borrar Gammas Para Reempaque
-  </button>
+    <button
+      id="gama-button"
+      on:click={handleUpdateGamaClick}
+      disabled={disabled}
+      class="inline-flex items-center h-7 px-3 rounded border border-sky-500 text-sky-400 text-xs font-semibold
+             bg-transparent hover:bg-sky-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Actualizar Gammas
+    </button>
+
+    <button
+      id="gama-button"
+      on:click={handleDeletedGamaClick}
+      disabled={disabled}
+      class="inline-flex items-center h-7 px-3 rounded border border-rose-500 text-rose-400 text-xs font-semibold
+             bg-transparent hover:bg-rose-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Borrar Gammas Para Reempaque
+    </button>
+  </div>
 </header>
-
-<style>
-  /* dejo tu CSS tal cual lo tenías */
-  header {
-    background-color: #061933;
-    color: white;
-    height: 2em;
-    line-height: 2em;
-  }
-
-  header > img {
-    position: absolute;
-    height: 2em;
-  }
-
-  header > b {
-    margin-left: 3em;
-  }
-
-  header > strong {
-    background-color: #ffffff33;
-    border-radius: 0.25em;
-    color: #ff9500;
-    margin: 0 0.5em;
-    min-width: 3em;
-    padding: 0 0.5em;
-  }
-
-  button#apply-changeover-button {
-    background-color: transparent;
-    color: #48c78e;
-    display: inline;
-    float: right;
-    padding: 0 0.5em;
-    border: none;
-    height: 2em;
-    line-height: 2em;
-    cursor: pointer;
-    -webkit-transition: background-color 100ms linear;
-    -moz-transition: background-color 100ms linear;
-    -o-transition: background-color 100ms linear;
-    -ms-transition: background-color 100ms linear;
-    transition: background-color 100ms linear;
-  }
-
-  button#apply-changeover-button:hover {
-    background-color: #48c78e;
-    border-color: transparent;
-    color: #fff;
-  }
-
-  button#gama-button {
-    background-color: transparent;
-    color: #48c78e;
-    display: inline;
-    padding: 0 0.5em;
-    border: none;
-    height: 2em;
-    line-height: 2em;
-    cursor: pointer;
-    -webkit-transition: background-color 100ms linear;
-    -moz-transition: background-color 100ms linear;
-    -o-transition: background-color 100ms linear;
-    -ms-transition: background-color 100ms linear;
-    transition: background-color 100ms linear;
-  }
-
-  button#gama-button:hover {
-    background-color: #48c78e;
-    border-color: transparent;
-    color: #fff;
-  }
-</style>

@@ -1,5 +1,5 @@
 <script>
-    // @ts-nocheck
+  // @ts-nocheck
   import { onMount } from "svelte";
 
   export let showToKeep;
@@ -20,83 +20,52 @@
   });
 </script>
 
-<footer>
-  <label class="keep nohigh">
-    <input type="checkbox" bind:checked={showToKeep} />
-    <b>COM&Uacute;N</b>
+<footer
+  class="absolute bottom-0 inset-x-0 h-8 bg-[#061933] text-white text-xs
+         flex items-center gap-2 px-4 select-none"
+>
+  <!-- COMÚN -->
+  <label
+    class="inline-flex items-center gap-1 rounded border border-sky-600
+           bg-sky-50 text-sky-700 px-1.5 py-0.5 cursor-pointer"
+  >
+    <input
+      type="checkbox"
+      bind:checked={showToKeep}
+      class="h-3 w-3 accent-sky-500"
+    />
+    <b class="text-[0.7rem] font-semibold bg-sky-500 text-white px-1.5 py-0.5 rounded">
+      COM&Uacute;N
+    </b>
   </label>
-  <label class="take nohigh">
-    <input type="checkbox" bind:checked={showToTake} />
-    <b>RETORNAR</b>
+
+  <!-- RETORNAR -->
+  <label
+    class="inline-flex items-center gap-1 rounded border border-amber-700
+           bg-amber-50 text-amber-800 px-1.5 py-0.5 cursor-pointer"
+  >
+    <input
+      type="checkbox"
+      bind:checked={showToTake}
+      class="h-3 w-3 accent-amber-500"
+    />
+    <b class="text-[0.7rem] font-semibold bg-amber-300 text-black/70 px-1.5 py-0.5 rounded">
+      RETORNAR
+    </b>
   </label>
-  <label class="put nohigh">
-    <input type="checkbox" bind:checked={showToPut} />
-    <b>CARGAR</b>
+
+  <!-- CARGAR -->
+  <label
+    class="inline-flex items-center gap-1 rounded border border-rose-600
+           bg-rose-50 text-rose-700 px-1.5 py-0.5 cursor-pointer"
+  >
+    <input
+      type="checkbox"
+      bind:checked={showToPut}
+      class="h-3 w-3 accent-rose-500"
+    />
+    <b class="text-[0.7rem] font-semibold bg-rose-500 text-white px-1.5 py-0.5 rounded">
+      CARGAR
+    </b>
   </label>
 </footer>
-
-<style>
-  footer {
-    background-color: #061933;
-    bottom: 0;
-    color: white;
-    height: 2em;
-    line-height: 2em;
-    padding-left: 1em;
-    position: absolute;
-    width: 100%;
-  }
-
-  footer > label {
-    border: none;
-    display: inline-block;
-    padding: 0 0.25em;
-  }
-
-  .nohigh {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-  }
-  .nohigh::selection {
-    background: transparent;
-  }
-
-  b {
-    padding: 0 0.5em;
-  }
-
-  .keep {
-    background-color: #eff5fb;
-    border: 1px solid #296fa8;
-    color: #296fa8;
-  }
-
-  .keep > b {
-    background-color: #3e8ed0;
-    color: #fff;
-  }
-
-  .put {
-    background-color: #feecf0;
-    border: 1px solid #cc0f35;
-    color: #cc0f35;
-  }
-
-  .put > b {
-    background-color: #f14668;
-    color: #fff;
-  }
-
-  .take {
-    background-color: #fffaeb;
-    border: 1px solid #946c00;
-    color: #946c00;
-  }
-
-  .take > b {
-    background-color: #ffe08a;
-    color: rgba(0, 0, 0, 0.7);
-  }
-</style>
