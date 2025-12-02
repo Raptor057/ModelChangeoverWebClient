@@ -36,6 +36,18 @@ const getOptions = (method, data = null) => {
     return data == null ? options : { ...options, body: JSON.stringify(data) }
 }
 
+    const toQueryString = (params) => {
+        const esc = encodeURIComponent;
+        const entries = Object.entries(params)
+            .filter(([k, v]) => v !== undefined && v !== null && v !== '');
+        
+        if (entries.length === 0) return '';
+        
+        return '?' + entries
+            .map(([k, v]) => `${esc(k)}=${esc(v)}`)
+            .join('&');
+    };
+    
 const HttpRequest = (function () {
     const httpRequest = async (method, url, data = null) => {
         console.debug("method", method);
@@ -52,16 +64,18 @@ const HttpRequest = (function () {
             .then ((json) => json.data)
             .catch (handleRejectedResponse);
     };
+
     return {
         get: async (url) => httpRequest('GET', url),
         put: async (url, data) => httpRequest('PUT', url, data),
+        patch: async (url, data) => httpRequest('PATCH', url, data),
         post: async (url, data) => httpRequest('POST', url, data),
         delete: async (url, data) => httpRequest('DELETE', url, data),
     };
 })();
 
 export const ChangeoverApi = (function (apiUrl) {
-    //apiUrl = 'http://localhost:5063';
+    apiUrl = 'http://localhost:5063';
     return {
         getLine: (lineCode) =>
             HttpRequest.get(`${apiUrl}/api/lines/${lineCode}`),
@@ -71,14 +85,17 @@ export const ChangeoverApi = (function (apiUrl) {
             HttpRequest.get(`${apiUrl}/api/lines/${lineCode}/gamma/${partNo}`),
         applyChangeover: (lineCode) =>
             HttpRequest.put(`${apiUrl}/api/lines/${lineCode}/codew`, { }),
+        GetWorkOrderAvailablesByLineID: (lineID) =>
+            HttpRequest.get(`${apiUrl}/api/GetWorkOrderAvailablesByLineID/${lineID}`),
+        UpdateProductionLineStatus: (lineCode, patch) =>
+            HttpRequest.patch(`${apiUrl}/api/ProductionLineStatus/Update/${encodeURIComponent(lineCode)}`+ toQueryString(patch)),
     };
 })("http://mxsrvapps.gt.local/gtt/services/changeovers");
 
 export const CommonApi = (function (apiUrl) {
-    //apiUrl = 'http://localhost:5160';
+    apiUrl = 'http://localhost:5160';
     return {
         UpdateGama: async (ogpartNo,icpartNo,oglineCode,iclineCode) =>
-            //HttpRequest.put(`${apiUrl}/api/lines/updategama/partno/${partNo}/lineCode/${lineCode}`),
         HttpRequest.put(`${apiUrl}/api/lines/updategama/partno/${ogpartNo}/${icpartNo}/lineCode/${oglineCode}/${iclineCode}`),
 
         DeleteGama: async (ogpartNo,icpartNo,oglineCode,iclineCode) =>
