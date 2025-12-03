@@ -77,6 +77,8 @@ const HttpRequest = (function () {
 export const ChangeoverApi = (function (apiUrl) {
     apiUrl = 'http://localhost:5063';
     return {
+        getApiInfo: () =>
+            HttpRequest.get(`${apiUrl}/api/info`),
         getLine: (lineCode) =>
             HttpRequest.get(`${apiUrl}/api/lines/${lineCode}`),
         getWorkOrderByLineID: (lineID) =>
@@ -95,6 +97,9 @@ export const ChangeoverApi = (function (apiUrl) {
 export const CommonApi = (function (apiUrl) {
     apiUrl = 'http://localhost:5160';
     return {
+        getApiInfo: () =>
+            HttpRequest.get(`${apiUrl}/api/info`),
+        
         UpdateGama: async (ogpartNo,icpartNo,oglineCode,iclineCode) =>
         HttpRequest.put(`${apiUrl}/api/lines/updategama/partno/${ogpartNo}/${icpartNo}/lineCode/${oglineCode}/${iclineCode}`),
 

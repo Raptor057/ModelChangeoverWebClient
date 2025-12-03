@@ -53,23 +53,40 @@
   };
 
   // Actualizar estado de línea con la orden seleccionada
-  const handleUpdateProductionLineStatus = (nextWorkOrderCode: string) => {
-    const patch = {
-      ModelChangeoverInProcess: true,
-      NextWorkOrderCode: nextWorkOrderCode
-    };
-    ChangeoverApi.UpdateProductionLineStatus(line.code, patch)
-      .then(() => {
-        console.log('Estado de línea actualizado para', line.code, 'con orden', nextWorkOrderCode);
-      });
+const handleUpdateProductionLineStatus = (nextWorkOrderCode: string | null, isActive: boolean) => {
+  const patch = {
+    ModelChangeoverInProcess: isActive,
+    NextWorkOrderCode: isActive ? nextWorkOrderCode : null
   };
 
+  ChangeoverApi.UpdateProductionLineStatus(line.code, patch)
+    .then(() => {
+      console.log(
+        'Estado de línea actualizado para',
+        line.code,
+        'ModelChangeoverInProcess =',
+        isActive,
+        'NextWorkOrderCode =',
+        isActive ? nextWorkOrderCode : null
+      );
+    });
+};
+
   // Handler al seleccionar un toggle
-  const handleSelectNextWorkOrder = (nextCode: string) => {
+const handleSelectNextWorkOrder = (nextCode: string, isChecked: boolean) => {
+  if (isChecked) {
+    // Activando el toggle: dejamos esta WO como siguiente
     selectedWorkOrderCode = nextCode;
-    handleUpdateProductionLineStatus(nextCode);
-    // Si quieres, aquí podrías cerrar el modal manualmente.
-  };
+    handleUpdateProductionLineStatus(nextCode, true);
+  } else {
+    // Desactivando el toggle: limpiamos el estado
+    if (selectedWorkOrderCode === nextCode) {
+      selectedWorkOrderCode = null;
+    }
+    handleUpdateProductionLineStatus(null, false);
+  }
+};
+
 </script>
 
 <header class="relative flex items-center gap-3 h-8 bg-[#061933] text-white text-xs px-3">
@@ -344,14 +361,14 @@
                       </svg>
                     </span>
                   </span>
-                  <input
-                    type="checkbox"
-                    name={`anticipated-${item.workOrderCode}`}
-                    aria-label={`Seleccionar ${item.workOrderCode} como siguiente orden`}
-                    class="absolute inset-0 appearance-none focus:outline-hidden"
-                    checked={selectedWorkOrderCode === item.workOrderCode}
-                    on:change={() => handleSelectNextWorkOrder(item.workOrderCode)}
-                  />
+                    <input
+                      type="checkbox"
+                      name={`anticipated-${item.workOrderCode}`}
+                      aria-label={`Seleccionar ${item.workOrderCode} como siguiente orden`}
+                      class="absolute inset-0 appearance-none focus:outline-hidden"
+                      checked={selectedWorkOrderCode === item.workOrderCode}
+                      on:change={(event) => handleSelectNextWorkOrder(item.workOrderCode, event.currentTarget.checked)}
+                    />
                 </div>
               </div>
             {/each}
