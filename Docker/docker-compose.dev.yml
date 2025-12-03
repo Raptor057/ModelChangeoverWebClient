@@ -1,0 +1,18 @@
+# Docker Compose file for Model Changeover Web Client in Development
+# Usage: inside the ModelChangeoverWebClient directory, run:
+# docker compose -f ..\Docker\docker-compose.dev.yml up --build -d
+services:
+  model-changeover-webclient:
+    build:
+      context: ../ModelChangeoverWebClient
+      dockerfile: Dockerfile
+      args:
+        BASE_PATH: ""  # para que el build genere rutas relativas a /
+    image: model-change-over-web-client:latest
+    container_name: model-change-over-web-client
+    ports:
+      - "8080:80"
+    extra_hosts:
+      - "mxsrvapps:192.168.0.46"
+      - "mxsrvcegid:192.168.0.27"
+      - "mxsrvtraca:192.168.0.7"

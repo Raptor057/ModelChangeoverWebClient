@@ -1,0 +1,12 @@
+.svelte-kit/
+node_modules/
+.vscode/
+.DS_Store
+build/
+.env
+dist/
+*.log
+*.md
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
