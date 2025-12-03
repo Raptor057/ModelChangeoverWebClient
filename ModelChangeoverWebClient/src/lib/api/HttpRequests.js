@@ -96,7 +96,7 @@ const HttpRequest = (function () {
 })();
 
 export const ChangeoverApi = (function (apiUrl) {
-    apiUrl = 'http://localhost:5063';
+    //apiUrl = 'http://localhost:5063';
     return {
         getApiInfo: () =>
             HttpRequest.get(`${apiUrl}/api/info`),
@@ -118,7 +118,7 @@ export const ChangeoverApi = (function (apiUrl) {
 })("http://mxsrvapps.gt.local/gtt/services/changeovers");
 
 export const CommonApi = (function (apiUrl) {
-    apiUrl = 'http://localhost:5160';
+    //apiUrl = 'http://localhost:5160';
     return {
         getApiInfo: () =>
             HttpRequest.get(`${apiUrl}/api/info`),

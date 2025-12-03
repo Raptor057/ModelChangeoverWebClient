@@ -278,7 +278,16 @@ const checkHealthOnce = async () => {
                 <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 inset-ring inset-ring-blue-700/10">
                   Project: {changeoverInfo?.project ?? '—'}
                 </span>
-                <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 inset-ring inset-ring-yellow-600/20">
+                <span
+                  class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium inset-ring inset-ring-yellow-600/20
+                        bg-gray-50 text-gray-600"
+                  class:bg-green-50={changeoverInfo?.environment === 'Production'}
+                  class:text-green-700={changeoverInfo?.environment === 'Production'}
+                  class:bg-yellow-50={changeoverInfo?.environment === 'Staging'}
+                  class:text-yellow-800={changeoverInfo?.environment === 'Staging'}
+                  class:bg-red-50={changeoverInfo?.environment === 'Development'}
+                  class:text-red-700={changeoverInfo?.environment === 'Development'}
+                >
                   Env: {changeoverInfo?.environment ?? '—'}
                 </span>
                 <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 inset-ring inset-ring-indigo-700/10">
@@ -313,8 +322,17 @@ const checkHealthOnce = async () => {
                 <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 inset-ring inset-ring-blue-700/10">
                   Project: {commonInfo?.project ?? '—'}
                 </span>
-                <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 inset-ring inset-ring-yellow-600/20">
-                  Env: {commonInfo?.environment ?? '—'}
+                <span
+                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium inset-ring inset-ring-yellow-600/20
+                bg-gray-50 text-gray-600"
+                class:bg-green-50={changeoverInfo?.environment === 'Production'}
+                class:text-green-700={changeoverInfo?.environment === 'Production'}
+                class:bg-yellow-50={changeoverInfo?.environment === 'Staging'}
+                class:text-yellow-800={changeoverInfo?.environment === 'Staging'}
+                class:bg-red-50={changeoverInfo?.environment === 'Development'}
+                class:text-red-700={changeoverInfo?.environment === 'Development'}
+                >
+                Env: {commonInfo?.environment ?? '—'}
                 </span>
                 <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 inset-ring inset-ring-indigo-700/10">
                   Version: {commonInfo?.version ?? '—'}
