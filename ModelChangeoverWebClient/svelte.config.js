@@ -1,5 +1,12 @@
+//Cuando vayas a generar el build para publicar en IIS:
+//# PowerShell
+//$env:BASE_PATH = "/gtt/mfg/changeovers"   # o "/ModelChangeoverWebClient", lo que uses
+//npm run build
+
 // export default config;
 import adapter from '@sveltejs/adapter-static';
+
+const base = process.env.BASE_PATH ?? '';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -12,10 +19,13 @@ const config = {
       strict: false
     }),
     paths: {
-      // si en IIS lo vas a colgar en un virtual dir, ej. /GT_Trace/Changeover,
-      // aquí pondrías base: '/GT_Trace/Changeover'
+      
+      // Estas 2 lineas son ejemplos de como configurar la base path para despliegues en IIS con virtual directories
       //base: process.env.NODE_ENV === 'production' ? '/ModelChangeoverWebClient' : '' //IIS virtual dir example
-      base: process.env.NODE_ENV === 'production' ? '/gtt/mfg/changeovers' : ''
+      //base: process.env.NODE_ENV === 'production' ? '/gtt/mfg/changeovers' : ''
+
+      // Configuracion general usando variable de entorno
+       base
     }
   }
 };
