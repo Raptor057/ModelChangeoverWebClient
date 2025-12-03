@@ -12,7 +12,7 @@ WORKDIR /app
 # Copiamos solo lo necesario para instalar deps
 COPY package*.json ./
 
-COPY .npmrc .npmrc
+#COPY .npmrc .npmrc
 
 # Instalar dependencias
 RUN npm install --loglevel verbose
