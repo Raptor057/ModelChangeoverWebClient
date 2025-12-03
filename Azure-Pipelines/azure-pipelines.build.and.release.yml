@@ -1,0 +1,190 @@
+name: $(Build.BuildId)
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+      - /version
+
+pr:
+  branches:
+    include:
+      - master
+
+variables:
+  IMAGE_NAME: gtm-packaging-webapi
+  HARBOR_REGISTRY: 192.168.0.110
+  HARBOR_PROJECT: gtm-packaging
+
+stages:
+
+  - stage: ReadVersion
+    displayName: 'Leer versión del archivo version'
+    jobs:
+      - job: GetTag
+        displayName: 'Leer y exponer IMAGE_TAG'
+        pool:
+          name: Deployment-Linux-Agents
+        steps:
+          - checkout: self
+
+          - script: |
+              VERSION=$(cat "$(Build.SourcesDirectory)/version")
+              TAG=$(echo "$VERSION" | sed 's/[^a-zA-Z0-9._-]/_/g')
+              echo "📦 Versión original: $VERSION"
+              echo "🏷️  Tag sanitizado: $TAG"
+              echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$TAG"
+            name: SetImageTag
+            displayName: 'Leer y sanitizar VERSION'
+
+  - stage: BuildAndPush
+    displayName: 'Build y push de imagen a Harbor en MXSRVGLPI'
+    dependsOn: ReadVersion
+    variables:
+      IMAGE_TAG: $[ stageDependencies.ReadVersion.GetTag.outputs['SetImageTag.IMAGE_TAG'] ]
+    jobs:
+      - job: BuildImage
+        pool:
+          name: Deployment-Linux-Agents
+        steps:
+          - checkout: self
+            submodules: true
+
+          - script: |
+              echo "$(HARBOR_PASSWORD)" | docker login $(HARBOR_REGISTRY) \
+                --username "robot\$root-user" \
+                --password-stdin
+            displayName: "Login en Harbor"
+            env:
+              HARBOR_PASSWORD: $(HARBOR_PASSWORD)
+              
+          - script: |
+              pwd
+              echo "Contenido raíz del repo:"
+              ls
+              echo "Contenido de Common:"
+              ls Common || echo "Common NO existe"
+            displayName: "Debug: listar archivos antes del build"
+
+          - script: |
+              docker build -f Docker/Dockerfile.build.release \
+                -t $(HARBOR_REGISTRY)/$(HARBOR_PROJECT)/$(IMAGE_NAME):$(IMAGE_TAG) .
+            displayName: "Build imagen Docker"
+
+          - script: |
+              docker push $(HARBOR_REGISTRY)/$(HARBOR_PROJECT)/$(IMAGE_NAME):$(IMAGE_TAG)
+            displayName: "Push a Harbor"
+
+
+  - stage: ExtractArtifact
+    displayName: 'Extraer carpeta /app y publicar como artefacto desde MXSRVGLPI'
+    dependsOn: [ReadVersion, BuildAndPush]
+    variables:
+      IMAGE_TAG: $[ stageDependencies.ReadVersion.GetTag.outputs['SetImageTag.IMAGE_TAG'] ]
+    jobs:
+      - job: ExtractAndPublish
+        pool:
+          name: Deployment-Linux-Agents
+        steps:
+          - checkout: self
+
+          - script: |
+              echo "📦 Extrayendo imagen con tag: $(IMAGE_TAG)"
+              docker rm -f buildcontainer || true
+              docker create --name buildcontainer $(HARBOR_REGISTRY)/$(HARBOR_PROJECT)/$(IMAGE_NAME):$(IMAGE_TAG)
+              docker cp buildcontainer:/app $(Build.ArtifactStagingDirectory)/public
+              docker rm buildcontainer
+            displayName: 'Extraer carpeta /app del contenedor'
+
+          - script: |
+              if [ ! -d "$(Build.ArtifactStagingDirectory)/public" ]; then
+                echo "❌ La carpeta 'public' no existe, abortando publicación."
+                exit 1
+              fi
+            displayName: 'Verificar existencia de carpeta public'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publicar artefacto public'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/public'
+              ArtifactName: 'public'
+              publishLocation: 'Container'
+
+  - stage: DeployProductionBackup
+    displayName: 'Desplegar respaldo en MXSRVAPPS'
+    dependsOn: ExtractArtifact
+    jobs:
+      - job: DeployMXSRVAPPS
+        displayName: 'Desplegar en MXSRVAPPS'
+        pool:
+          name: Deployment-Windows-Agents
+          demands:
+            - agent.name -equals MXSRVAPPS-1
+        steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Descargar artefacto public'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'public'
+              downloadPath: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PowerShell@2
+            displayName: 'Respaldar destino, detener App Pool, copiar y reiniciar'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $appPool = "Packaging Services App Pool"
+                $source = "$(Build.ArtifactStagingDirectory)\public"
+                $destination = "C:\apps\web\gtt\services\packaging"
+                $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+                $backup = "$(Build.ArtifactStagingDirectory)\last-backup"
+
+                Write-Host "##vso[task.setvariable variable=LAST_BACKUP_PATH]$backup"
+
+                Write-Host "Respaldando contenido actual en: $backup"
+                if (Test-Path $destination) {
+                  New-Item -Path $backup -ItemType Directory -Force | Out-Null
+                  Copy-Item -Path "$destination\*" -Destination $backup -Recurse -Force -ErrorAction Stop
+                }
+
+                Write-Host "Deteniendo app pool: $appPool"
+                Import-Module WebAdministration
+                Stop-WebAppPool -Name $appPool
+
+                Write-Host "Esperando que se liberen los archivos..."
+                for ($i = 0; $i -lt 10; $i++) {
+                  $locked = Get-Process | Where-Object {
+                    $_.Modules.FileName -like "*$destination*"
+                  }
+
+                  if (-not $locked) { break }
+                  Start-Sleep -Seconds 1
+                }
+
+                Write-Host "Copiando archivos de $source a $destination"
+                Copy-Item -Path "$source\*" -Destination $destination -Recurse -Force
+
+                Write-Host "Iniciando app pool: $appPool"
+                Start-WebAppPool -Name $appPool
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publicar respaldo como artefacto'
+            inputs:
+              PathtoPublish: '$(LAST_BACKUP_PATH)'
+              ArtifactName: 'last-backup-$(Build.BuildId)'
+              publishLocation: 'Container'
+
+  - stage: DeployProduction
+    displayName: 'Despliegue en producción (MXGROGU)'
+    dependsOn: ExtractArtifact
+    jobs:
+      - job: DeployMXGROGU
+        displayName: 'Desplegar en MXGROGU (prueba)'
+        pool:
+          name: Deployment-Linux-Agents
+        steps:
+          - script: echo "👋 Hola mundo desde el job MXGROGU"
+            displayName: 'Imprimir hola mundo'
