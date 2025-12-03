@@ -53,16 +53,37 @@ const HttpRequest = (function () {
         console.debug("method", method);
         console.debug("url", url);
         console.debug("data", data);
+
         return fetch(url, getOptions(method, data))
             .then(response => {
                 console.debug("response", response);
                 if (!response.ok) {
                     return Promise.reject(response);
                 }
-                return response.json();
+
+                const contentType = response.headers.get('content-type') || '';
+
+                // Sin contenido (204 No Content, etc.)
+                if (response.status === 204) {
+                    return null;
+                }
+
+                // Si es JSON
+                if (contentType.includes('application/json')) {
+                    return response.json().then(json => {
+                        // Si tu API viene envuelta en { data: ... } lo sigues soportando
+                        if (json && Object.prototype.hasOwnProperty.call(json, 'data')) {
+                            return json.data;
+                        }
+                        // Si no tiene "data", regresa el JSON tal cual (caso /api/info)
+                        return json;
+                    });
+                }
+
+                // Si no es JSON, asumimos texto (caso /api/health => "Healthy")
+                return response.text();
             })
-            .then ((json) => json.data)
-            .catch (handleRejectedResponse);
+            .catch(handleRejectedResponse);
     };
 
     return {
@@ -79,6 +100,8 @@ export const ChangeoverApi = (function (apiUrl) {
     return {
         getApiInfo: () =>
             HttpRequest.get(`${apiUrl}/api/info`),
+        getHealth: () =>
+            HttpRequest.get(`${apiUrl}/api/health`),
         getLine: (lineCode) =>
             HttpRequest.get(`${apiUrl}/api/lines/${lineCode}`),
         getWorkOrderByLineID: (lineID) =>
@@ -100,6 +123,9 @@ export const CommonApi = (function (apiUrl) {
         getApiInfo: () =>
             HttpRequest.get(`${apiUrl}/api/info`),
         
+        getHealth: () =>
+            HttpRequest.get(`${apiUrl}/api/health`),
+
         UpdateGama: async (ogpartNo,icpartNo,oglineCode,iclineCode) =>
         HttpRequest.put(`${apiUrl}/api/lines/updategama/partno/${ogpartNo}/${icpartNo}/lineCode/${oglineCode}/${iclineCode}`),
 
