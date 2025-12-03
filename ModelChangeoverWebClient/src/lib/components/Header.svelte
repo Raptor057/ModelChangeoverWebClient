@@ -91,7 +91,7 @@ const handleSelectNextWorkOrder = (nextCode: string, isChecked: boolean) => {
 
 <header class="relative flex items-center gap-3 h-8 bg-[#061933] text-white text-xs px-3">
   <img
-    src="/gt-logo.png"
+    src="gt-logo.png"
     alt="General Transmissions"
     class="h-6 w-auto"
   />
