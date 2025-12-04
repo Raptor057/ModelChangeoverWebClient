@@ -110,79 +110,67 @@ stages:
               ArtifactName: 'public'
               publishLocation: 'Container'
 
-  # - stage: DeployProductionBackup
-  #   displayName: 'Desplegar respaldo en MXSRVAPPS'
-  #   dependsOn: ExtractArtifact
-  #   jobs:
-  #     - job: DeployMXSRVAPPS
-  #       displayName: 'Desplegar en MXSRVAPPS'
-  #       pool:
-  #         name: Deployment-Windows-Agents
-  #         demands:
-  #           - agent.name -equals MXSRVAPPS-1
-  #       steps:
-  #         - task: DownloadBuildArtifacts@0
-  #           displayName: 'Descargar artefacto public'
-  #           inputs:
-  #             buildType: 'current'
-  #             downloadType: 'single'
-  #             artifactName: 'public'
-  #             downloadPath: '$(Build.ArtifactStagingDirectory)'
-
-  #         - task: PowerShell@2
-  #           displayName: 'Respaldar destino, detener App Pool, copiar y reiniciar'
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               $appPool = "Packaging Services App Pool"
-  #               $source = "$(Build.ArtifactStagingDirectory)\public"
-  #               $destination = "C:\apps\web\gtt\services\packaging"
-  #               $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-  #               $backup = "$(Build.ArtifactStagingDirectory)\last-backup"
-
-  #               Write-Host "##vso[task.setvariable variable=LAST_BACKUP_PATH]$backup"
-
-  #               Write-Host "Respaldando contenido actual en: $backup"
-  #               if (Test-Path $destination) {
-  #                 New-Item -Path $backup -ItemType Directory -Force | Out-Null
-  #                 Copy-Item -Path "$destination\*" -Destination $backup -Recurse -Force -ErrorAction Stop
-  #               }
-
-  #               Write-Host "Deteniendo app pool: $appPool"
-  #               Import-Module WebAdministration
-  #               Stop-WebAppPool -Name $appPool
-
-  #               Write-Host "Esperando que se liberen los archivos..."
-  #               for ($i = 0; $i -lt 10; $i++) {
-  #                 $locked = Get-Process | Where-Object {
-  #                   $_.Modules.FileName -like "*$destination*"
-  #                 }
-
-  #                 if (-not $locked) { break }
-  #                 Start-Sleep -Seconds 1
-  #               }
-
-  #               Write-Host "Copiando archivos de $source a $destination"
-  #               Copy-Item -Path "$source\*" -Destination $destination -Recurse -Force
-
-  #               Write-Host "Iniciando app pool: $appPool"
-  #               Start-WebAppPool -Name $appPool
-
-  #         - task: PublishBuildArtifacts@1
-  #           displayName: 'Publicar respaldo como artefacto'
-  #           inputs:
-  #             PathtoPublish: '$(LAST_BACKUP_PATH)'
-  #             ArtifactName: 'last-backup-$(Build.BuildId)'
-  #             publishLocation: 'Container'
-
-  - stage: DeployProduction
-    displayName: 'Despliegue en producción (MXGROGU)'
+  - stage: DeployProductionBackup
+    displayName: 'Desplegar respaldo en MXSRVAPPS'
     dependsOn: ExtractArtifact
     jobs:
-      - job: DeployMXGROGU
-        displayName: 'Desplegar en MXGROGU (prueba)'
+      - job: DeployMXSRVAPPS
+        displayName: 'Desplegar en MXSRVAPPS'
         pool:
-          name: Deployment-Linux-Agents
+          name: Deployment-Windows-Agents
+          demands:
+            - agent.name -equals MXSRVAPPS-1
         steps:
-          - script: echo "👋 Hola mundo desde el job MXGROGU"
-            displayName: 'Imprimir hola mundo'
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Descargar artefacto public'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'public'
+              downloadPath: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PowerShell@2
+            displayName: 'Respaldar destino, detener App Pool, copiar y reiniciar'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $appPool = "Changeover App Pool Web Client"
+                $source = "$(Build.ArtifactStagingDirectory)\public"
+                $destination = "C:\apps\web\gtt\mfg\changeovers"
+                $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+                $backup = "$(Build.ArtifactStagingDirectory)\last-backup"
+
+                Write-Host "##vso[task.setvariable variable=LAST_BACKUP_PATH]$backup"
+
+                Write-Host "Respaldando contenido actual en: $backup"
+                if (Test-Path $destination) {
+                  New-Item -Path $backup -ItemType Directory -Force | Out-Null
+                  Copy-Item -Path "$destination\*" -Destination $backup -Recurse -Force -ErrorAction Stop
+                }
+
+                Write-Host "Deteniendo app pool: $appPool"
+                Import-Module WebAdministration
+                Stop-WebAppPool -Name $appPool
+
+                Write-Host "Esperando que se liberen los archivos..."
+                for ($i = 0; $i -lt 10; $i++) {
+                  $locked = Get-Process | Where-Object {
+                    $_.Modules.FileName -like "*$destination*"
+                  }
+
+                  if (-not $locked) { break }
+                  Start-Sleep -Seconds 1
+                }
+
+                Write-Host "Copiando archivos de $source a $destination"
+                Copy-Item -Path "$source\*" -Destination $destination -Recurse -Force
+
+                Write-Host "Iniciando app pool: $appPool"
+                Start-WebAppPool -Name $appPool
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publicar respaldo como artefacto'
+            inputs:
+              PathtoPublish: '$(LAST_BACKUP_PATH)'
+              ArtifactName: 'last-backup-$(Build.BuildId)'
+              publishLocation: 'Container'
