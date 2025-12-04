@@ -74,7 +74,7 @@ stages:
 
 
   - stage: ExtractArtifact
-    displayName: 'Extraer carpeta /app y publicar como artefacto desde MXSRVGLPI'
+    displayName: 'Extraer build estático de la imagen y publicar artefacto'
     dependsOn: [ReadVersion, BuildAndPush]
     variables:
       IMAGE_TAG: $[ stageDependencies.ReadVersion.GetTag.outputs['SetImageTag.IMAGE_TAG'] ]
@@ -89,9 +89,12 @@ stages:
               echo "📦 Extrayendo imagen con tag: $(IMAGE_TAG)"
               docker rm -f buildcontainer || true
               docker create --name buildcontainer $(HARBOR_REGISTRY)/$(HARBOR_PROJECT)/$(IMAGE_NAME):$(IMAGE_TAG)
-              docker cp buildcontainer:/app $(Build.ArtifactStagingDirectory)/public
+
+              # Copiar SOLO el contenido de /usr/share/nginx/html
+              docker cp buildcontainer:/usr/share/nginx/html/. $(Build.ArtifactStagingDirectory)/public
+
               docker rm buildcontainer
-            displayName: 'Extraer carpeta /app del contenedor'
+            displayName: 'Extraer carpeta estática del contenedor'
 
           - script: |
               if [ ! -d "$(Build.ArtifactStagingDirectory)/public" ]; then
